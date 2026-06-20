@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
+
+	"github.com/artorias305/ash/commands/builtin"
 )
 
-var builtin_commands = []string{"echo", "type", "exit"}
-
 func Type(command string) {
-	if slices.Contains(builtin_commands, command) {
+	if builtin.IsBuiltin(command) {
 		fmt.Printf("%s is a shell builtin\n", command)
 	} else {
 		path, found := scanPathForCommand(command)

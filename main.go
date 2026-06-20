@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/artorias305/ash/commands"
 )
 
 func main() {
@@ -21,11 +23,17 @@ func main() {
 		}
 
 		line := strings.TrimSpace(scanner.Text())
+		args := strings.Fields(line)
 
-		if line == "exit" {
+		cmd := args[0]
+		args = args[1:]
+
+		if cmd == "exit" {
 			break
+		} else if cmd == "echo" {
+			commands.Echo(args)
+		} else {
+			fmt.Printf("%s: command not found\n", line)
 		}
-
-		fmt.Printf("%s: command not found\n", line)
 	}
 }

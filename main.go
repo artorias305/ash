@@ -32,6 +32,8 @@ func main() {
 			break
 		} else if cmd == "echo" {
 			commands.Echo(args)
+		} else if cmd == "type" {
+			commands.Type(args[0])
 		} else {
 			fmt.Printf("%s: command not found\n", line)
 		}

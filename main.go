@@ -28,14 +28,6 @@ func main() {
 		cmd := args[0]
 		args = args[1:]
 
-		if cmd == "exit" {
-			break
-		} else if cmd == "echo" {
-			commands.Echo(args)
-		} else if cmd == "type" {
-			commands.Type(args[0])
-		} else {
-			fmt.Printf("%s: command not found\n", line)
-		}
+		commands.RunCommand(cmd, args)
 	}
 }

@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -36,7 +35,8 @@ func scanPathForCommand(command string) (string, bool) {
 				fullPath := dir + "/" + entry.Name()
 				executable, err := checkIfCommandIsExecutable(fullPath)
 				if err != nil {
-					log.Fatal(err)
+					// log.Fatal(err)
+					continue
 				}
 				if entry.Name() == command && executable {
 					return fullPath, true
@@ -54,4 +54,8 @@ func checkIfCommandIsExecutable(command string) (bool, error) {
 	}
 
 	return info.Mode().Perm()&0111 != 0, nil
+}
+
+func IsOnPathAndExecutables(command string) {
+
 }

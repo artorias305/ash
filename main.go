@@ -23,6 +23,11 @@ func main() {
 		}
 
 		line := strings.TrimSpace(scanner.Text())
+
+		if line == "" {
+			continue
+		}
+
 		args := strings.Fields(line)
 
 		cmd := args[0]

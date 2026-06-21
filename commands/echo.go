@@ -1,10 +1,13 @@
 package commands
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
-func Echo(message []string) {
+func Echo(w io.Writer, message []string) {
 	for _, m := range message {
-		fmt.Printf("%s ", m)
+		fmt.Fprintf(w, "%s ", m)
 	}
-	fmt.Println()
+	fmt.Fprintln(w)
 }

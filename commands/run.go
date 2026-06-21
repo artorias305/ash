@@ -2,19 +2,20 @@ package commands
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 )
 
-func RunCommand(command string, args []string) {
+func RunCommand(command string, args []string, w io.Writer) {
 	switch command {
 	case "exit":
 		os.Exit(0)
 	case "echo":
-		Echo(args)
+		Echo(w, args)
 	case "type":
 		if len(args) != 0 {
-			Type(args[0])
+			Type(w, args[0])
 		}
 	case "cd":
 		if len(args) == 0 {
@@ -24,10 +25,10 @@ func RunCommand(command string, args []string) {
 		}
 	default:
 		cmd := exec.Command(command, args...)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
+		cmd.Stdout = w
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
-		fmt.Print(string(output))
 	}
 }

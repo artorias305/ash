@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -34,9 +35,26 @@ func main() {
 			continue
 		}
 
-		cmd := args[0]
-		args = args[1:]
+		cleanArgs, redirectFile, err := helpers.ExtractRedirect(args)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			continue
+		}
 
-		commands.RunCommand(cmd, args)
+		cmd := cleanArgs[0]
+		cleanArgs = cleanArgs[1:]
+
+		w := io.Writer(os.Stdout)
+		if redirectFile != "" {
+			file, err := os.Create(redirectFile)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				continue
+			}
+			w = file
+			defer file.Close()
+		}
+
+		commands.RunCommand(cmd, cleanArgs, w)
 	}
 }

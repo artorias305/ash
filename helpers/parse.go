@@ -20,6 +20,11 @@ func ParseCliInput(input string) []string {
 		} else if inDoubleQuote {
 			if c == '"' {
 				inDoubleQuote = false
+			} else if c == '\\' {
+				if input[i+1] == '"' || input[i+1] == '$' || input[i+1] == '\\' || input[i+1] == '`' {
+					i++
+					buf.WriteByte(input[i])
+				}
 			} else {
 				buf.WriteByte(c)
 			}

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/artorias305/ash/commands"
+	"github.com/artorias305/ash/helpers"
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 			continue
 		}
 
-		args := strings.Fields(line)
+		args := helpers.ParseCliInput(line)
 
 		cmd := args[0]
 		args = args[1:]

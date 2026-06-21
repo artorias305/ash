@@ -16,6 +16,8 @@ func RunCommand(command string, args []string) {
 		if len(args) != 0 {
 			Type(args[0])
 		}
+	case "cd":
+		Cd(args[0])
 	default:
 		cmd := exec.Command(command, args...)
 		output, err := cmd.CombinedOutput()

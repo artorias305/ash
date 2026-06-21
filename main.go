@@ -30,6 +30,9 @@ func main() {
 		}
 
 		args := helpers.ParseCliInput(line)
+		if len(args) == 0 {
+			continue
+		}
 
 		cmd := args[0]
 		args = args[1:]

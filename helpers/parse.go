@@ -29,6 +29,11 @@ func ParseCliInput(input string) []string {
 				inQuote = true
 			case '"':
 				inDoubleQuote = true
+			case '\\':
+				if i+1 < len(input) {
+					i++
+					buf.WriteByte(input[i])
+				}
 			case ' ', '\t', '\n', '\r':
 				if buf.Len() > 0 {
 					args = append(args, buf.String())

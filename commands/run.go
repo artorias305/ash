@@ -17,7 +17,11 @@ func RunCommand(command string, args []string) {
 			Type(args[0])
 		}
 	case "cd":
-		Cd(args[0])
+		if len(args) == 0 {
+			Cd("~")
+		} else {
+			Cd(args[0])
+		}
 	default:
 		cmd := exec.Command(command, args...)
 		output, err := cmd.CombinedOutput()

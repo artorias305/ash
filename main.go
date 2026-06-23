@@ -7,13 +7,15 @@ import (
 	"strings"
 
 	"github.com/artorias305/ash/commands"
+	"github.com/artorias305/ash/commands/builtin"
 	"github.com/artorias305/ash/helpers"
 
 	"golang.org/x/term"
 )
 
 func autoComplete(input string) string {
-	candidates := []string{"echo", "exit"}
+	candidates := builtin.BuiltinCommands
+	candidates = append(candidates, commands.ListPathExecutables()...)
 	for _, c := range candidates {
 		if strings.HasPrefix(c, input) {
 			return c[len(input):]

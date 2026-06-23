@@ -2,11 +2,14 @@ package helpers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 type Redirect struct {
-	File string
+	File   string
+	Append bool
+	FD     int
 }
 
 func ParseCliInput(input string) []string {
@@ -62,44 +65,49 @@ func ParseCliInput(input string) []string {
 	return args
 }
 
-func ExtractRedirect(args []string) ([]string, string, error) {
+func ExtractRedirect(args []string) ([]string, *Redirect, error) {
 	var cleanArgs []string
 
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 
-		if arg == ">" {
+		opIdx, opLen := findRedirectOp(arg)
+		if opIdx != -1 {
+			prefix := arg[:opIdx]
+			suffix := arg[opIdx+opLen:]
+
+			fd := 1
+			if prefix != "" {
+				n, err := strconv.Atoi(prefix)
+				if err != nil {
+					cleanArgs = append(cleanArgs, arg)
+					continue
+				}
+				fd = n
+			}
+
+			isAppend := opLen == 2
+
+			if suffix != "" {
+				return cleanArgs, &Redirect{FD: fd, File: suffix, Append: isAppend}, nil
+			}
 			if i+1 >= len(args) {
-				return nil, "", fmt.Errorf("syntax error: expected filename after >")
+				return nil, nil, fmt.Errorf("syntax error: expected filename after %s", arg)
 			}
-			return cleanArgs, args[i+1], nil
-		}
-
-		if strings.HasPrefix(arg, ">") {
-			filename := arg[1:]
-			if filename == "" {
-				if i+1 >= len(args) {
-					return nil, "", fmt.Errorf("syntax error: expected filename after >")
-				}
-				return cleanArgs, args[i+1], nil
-			}
-			return cleanArgs, filename, nil
-		}
-
-		if idx := strings.Index(arg, ">"); idx != -1 {
-			filename := arg[idx+1:]
-			cleanArgs = append(cleanArgs, arg[:idx])
-			if filename == "" {
-				if i+1 >= len(args) {
-					return nil, "", fmt.Errorf("syntax error: expected filename after >")
-				}
-				return cleanArgs, args[i+1], nil
-			}
-			return cleanArgs, filename, nil
-
+			return cleanArgs, &Redirect{FD: fd, File: args[i+1], Append: isAppend}, nil
 		}
 		cleanArgs = append(cleanArgs, arg)
-
 	}
-	return cleanArgs, "", nil
+	return cleanArgs, nil, nil
+}
+
+func findRedirectOp(s string) (int, int) {
+	idx := strings.Index(s, ">")
+	if idx == -1 {
+		return -1, 0
+	}
+	if idx+1 < len(s) && s[idx+1] == '>' {
+		return idx, 2
+	}
+	return idx, 1
 }

@@ -7,15 +7,15 @@ import (
 	"os/exec"
 )
 
-func RunCommand(command string, args []string, w io.Writer) {
+func RunCommand(command string, args []string, stdout, stderr io.Writer) {
 	switch command {
 	case "exit":
 		os.Exit(0)
 	case "echo":
-		Echo(w, args)
+		Echo(stdout, args)
 	case "type":
 		if len(args) != 0 {
-			Type(w, args[0])
+			Type(stdout, args[0])
 		}
 	case "cd":
 		if len(args) == 0 {
@@ -25,10 +25,10 @@ func RunCommand(command string, args []string, w io.Writer) {
 		}
 	default:
 		cmd := exec.Command(command, args...)
-		cmd.Stdout = w
-		cmd.Stderr = os.Stderr
+		cmd.Stdout = stdout
+		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(stderr, err)
 		}
 	}
 }

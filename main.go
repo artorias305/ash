@@ -35,7 +35,7 @@ func main() {
 			continue
 		}
 
-		cleanArgs, redirectFile, err := helpers.ExtractRedirect(args)
+		cleanArgs, redirect, err := helpers.ExtractRedirect(args)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
@@ -44,17 +44,33 @@ func main() {
 		cmd := cleanArgs[0]
 		cleanArgs = cleanArgs[1:]
 
-		w := io.Writer(os.Stdout)
-		if redirectFile != "" {
-			file, err := os.Create(redirectFile)
+		stdout := io.Writer(os.Stdout)
+		stderr := io.Writer(os.Stderr)
+
+		if redirect != nil {
+			var file *os.File
+			if redirect.Append {
+				file, err = os.OpenFile(redirect.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			} else {
+				file, err = os.Create(redirect.File)
+			}
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "error: %v\n", err)
 				continue
 			}
-			w = file
 			defer file.Close()
+
+			switch redirect.FD {
+			case 1:
+				stdout = file
+			case 2:
+				stderr = file
+			default:
+				fmt.Fprintf(os.Stderr, "error: unsupported file descriptor %d\n", redirect.FD)
+				continue
+			}
 		}
 
-		commands.RunCommand(cmd, cleanArgs, w)
+		commands.RunCommand(cmd, cleanArgs, stdout, stderr)
 	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -9,22 +8,73 @@ import (
 
 	"github.com/artorias305/ash/commands"
 	"github.com/artorias305/ash/helpers"
+
+	"golang.org/x/term"
 )
 
-func main() {
-	scanner := bufio.NewScanner(os.Stdin)
+func readLine(prompt string) (string, error) {
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		return "", err
+	}
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
+	fmt.Print(prompt)
+
+	var buf strings.Builder
 	for {
-		fmt.Print("$ ")
+		var b [1]byte
+		n, err := os.Stdin.Read(b[:])
+		if n > 0 {
+			switch b[0] {
+			case 9: // TAB
+				// TODO: implement tab completion
+				os.Stdout.Write([]byte("\r\n(TAB pressed)\r\n"))
+				fmt.Print(prompt)
+				os.Stdout.Write([]byte(buf.String()))
 
-		if !scanner.Scan() {
-			if err := scanner.Err(); err != nil {
-				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			case 13: // Enter (CR in raw mode)
+				os.Stdout.Write([]byte("\r\n"))
+				return buf.String(), nil
+
+			case 127: // Backspace
+				if buf.Len() > 0 {
+					s := buf.String()
+					buf.Reset()
+					buf.WriteString(s[:len(s)-1])
+					os.Stdout.Write([]byte("\b \b"))
+				}
+
+			case 3: // Ctrl-C
+				os.Stdout.Write([]byte("^C\r\n"))
+				return "", nil
+
+			case 4: // Ctrl-D (EOF)
+				os.Stdout.Write([]byte("\r\n"))
+				return "", io.EOF
+
+			default:
+				if b[0] >= 32 { // printable characters
+					buf.WriteByte(b[0])
+					os.Stdout.Write(b[:])
+				}
 			}
+		}
+		if err != nil {
+			return buf.String(), err
+		}
+	}
+}
+
+func main() {
+	for {
+		line, err := readLine("$ ")
+
+		if err == io.EOF {
 			break
 		}
 
-		line := strings.TrimSpace(scanner.Text())
+		line = strings.TrimSpace(line)
 
 		if line == "" {
 			continue

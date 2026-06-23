@@ -55,7 +55,3 @@ func checkIfCommandIsExecutable(command string) (bool, error) {
 
 	return info.Mode().Perm()&0111 != 0, nil
 }
-
-func IsOnPathAndExecutables(command string) {
-
-}

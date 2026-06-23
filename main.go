@@ -42,6 +42,9 @@ func readLine(prompt string) (string, error) {
 				if suffix != "" {
 					os.Stdout.Write([]byte(suffix))
 					buf.WriteString(suffix)
+					os.Stdout.Write([]byte{' '})
+					buf.WriteByte(' ')
+
 				}
 
 			case 13: // Enter (CR in raw mode)

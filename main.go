@@ -45,6 +45,8 @@ func readLine(prompt string) (string, error) {
 					os.Stdout.Write([]byte{' '})
 					buf.WriteByte(' ')
 
+				} else {
+					os.Stdout.Write([]byte{'\x07'})
 				}
 
 			case 13: // Enter (CR in raw mode)

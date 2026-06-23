@@ -12,6 +12,16 @@ import (
 	"golang.org/x/term"
 )
 
+func autoComplete(input string) string {
+	candidates := []string{"echo", "exit"}
+	for _, c := range candidates {
+		if strings.HasPrefix(c, input) {
+			return c[len(input):]
+		}
+	}
+	return ""
+}
+
 func readLine(prompt string) (string, error) {
 	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
@@ -28,10 +38,11 @@ func readLine(prompt string) (string, error) {
 		if n > 0 {
 			switch b[0] {
 			case 9: // TAB
-				// TODO: implement tab completion
-				os.Stdout.Write([]byte("\r\n(TAB pressed)\r\n"))
-				fmt.Print(prompt)
-				os.Stdout.Write([]byte(buf.String()))
+				suffix := autoComplete(buf.String())
+				if suffix != "" {
+					os.Stdout.Write([]byte(suffix))
+					buf.WriteString(suffix)
+				}
 
 			case 13: // Enter (CR in raw mode)
 				os.Stdout.Write([]byte("\r\n"))
